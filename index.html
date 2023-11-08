@@ -1,8 +1,10 @@
 <body>
-Push F10 to start recording, and release key to stop recording.
-</body>
+  Push F10 to start recording, and release key to stop recording.
+<body>
 <script>
   function initializePushToTalk(key) {
+    var permission = false;
+    let askingPermission = false;
     const speechRecognition = new webkitSpeechRecognition();
     speechRecognition.onresult = (event) => {
       const transcript = event.results[0][0].transcript;
@@ -15,11 +17,28 @@ Push F10 to start recording, and release key to stop recording.
 
     document.addEventListener("keydown", (event) => {
       if (event.key === key) {
-        if (!isListening) {
+        if (!isListening && permission) {
           speechRecognition.start();
           isListening = true;
           const speechEvent = new CustomEvent("speechstarted");
           document.dispatchEvent(speechEvent);
+        } else {
+          if (!askingPermission) {
+            askingPermission = true;
+            let recognition = new webkitSpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.start();
+
+            recognition.onstart = function () {
+              console.log("permission granted");
+              permission = true;
+              recognition.continuous = false;
+              recognition.interimResults = false;
+              recognition.stop();
+              recognition = undefined;
+            };
+          }
         }
       }
     });
@@ -67,3 +86,4 @@ Push F10 to start recording, and release key to stop recording.
     document.body.appendChild(statusElement);
   });
 </script>
+
