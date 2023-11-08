@@ -1,0 +1,45 @@
+<body>
+Push F10 to start recording, and release key to stop recording.
+</body>
+<script>
+  function initializePushToTalk(key) {
+    const speechRecognition = new webkitSpeechRecognition();
+    speechRecognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      const speechEvent = new CustomEvent("speech", {
+        detail: transcript,
+      });
+      document.dispatchEvent(speechEvent);
+    };
+    let isListening = false;
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === key) {
+        if (!isListening) {
+          speechRecognition.start();
+          isListening = true;
+          console.log("listening");
+        }
+      }
+    });
+
+    document.addEventListener("keyup", (event) => {
+      if (event.key === key && isListening) {
+        console.log("stopped listening");
+        setTimeout(() => {
+          speechRecognition.stop();
+          isListening = false;
+        }, 500);
+      }
+    });
+  }
+
+  initializePushToTalk("F10");
+
+  document.addEventListener("speech", (event) => {
+    const transcript = event.detail;
+    const transcriptElement = document.createElement("p");
+    transcriptElement.innerText = transcript;
+    document.body.appendChild(transcriptElement);
+  });
+</script>
