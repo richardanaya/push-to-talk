@@ -5,7 +5,15 @@
   function initializePushToTalk(key) {
     var permission = false;
     let askingPermission = false;
-    const speechRecognition = new webkitSpeechRecognition();
+
+    let speechFn;
+    if(window.webkitSpeechRecognition){
+      speechFn = webkitSpeechRecognition;
+    } else if(window.SpeechRecognition){
+      speechFn = SpeechRecognition;
+    }
+    
+    const speechRecognition = new speechFn();
     speechRecognition.onresult = (event) => {
       const transcript = event.results[0][0].transcript;
       const speechEvent = new CustomEvent("speech", {
@@ -25,7 +33,7 @@
         } else {
           if (!askingPermission) {
             askingPermission = true;
-            let recognition = new webkitSpeechRecognition();
+            let recognition = new speechFn();
             recognition.continuous = true;
             recognition.interimResults = true;
             recognition.start();
