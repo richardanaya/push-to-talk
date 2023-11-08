@@ -18,18 +18,30 @@ Push F10 to start recording, and release key to stop recording.
         if (!isListening) {
           speechRecognition.start();
           isListening = true;
-          console.log("listening");
+          const speechEvent = new CustomEvent("speechstarted");
+          document.dispatchEvent(speechEvent);
         }
+      }
+    });
+
+    function finish() {
+      setTimeout(() => {
+        speechRecognition.stop();
+        isListening = false;
+        const speechEvent = new CustomEvent("speechended");
+        document.dispatchEvent(speechEvent);
+      }, 500);
+    }
+
+    window.addEventListener("blur", () => {
+      if (isListening) {
+        finish();
       }
     });
 
     document.addEventListener("keyup", (event) => {
       if (event.key === key && isListening) {
-        console.log("stopped listening");
-        setTimeout(() => {
-          speechRecognition.stop();
-          isListening = false;
-        }, 500);
+        finish();
       }
     });
   }
@@ -41,5 +53,17 @@ Push F10 to start recording, and release key to stop recording.
     const transcriptElement = document.createElement("p");
     transcriptElement.innerText = transcript;
     document.body.appendChild(transcriptElement);
+  });
+
+  document.addEventListener("speechstarted", () => {
+    const statusElement = document.createElement("p");
+    statusElement.innerText = "Listening...";
+    document.body.appendChild(statusElement);
+  });
+
+  document.addEventListener("speechended", () => {
+    const statusElement = document.createElement("p");
+    statusElement.innerText = "Stopped listening.";
+    document.body.appendChild(statusElement);
   });
 </script>
