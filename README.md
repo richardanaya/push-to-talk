@@ -25,4 +25,6 @@ document.body.appendChild(statusElement);
 });
 ```
 
+See full code and demo [here](https://richardanaya.github.io/push-to-talk/index.html).
+
 LICENSE: MIT
