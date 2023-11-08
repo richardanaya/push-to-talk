@@ -3,6 +3,7 @@
 A simple javsacript snippet that shows how to make a simple push button voice to text recorder.
 
 ```javascript
+// setup push-to-talk so starts listening on "~" press and stops on release
 initializePushToTalk("~");
 
 document.addEventListener("speech", (event) => {
