@@ -1,5 +1,5 @@
 <body>
-  Push F10 to start recording, and release key to stop recording. <a href="https://github.com/richardanaya/push-to-talk/">GitHub</a>
+  Push ~ to start recording, and release key to stop recording. <a href="https://github.com/richardanaya/push-to-talk/">GitHub</a>
 <body>
 <script>
   function initializePushToTalk(key) {
@@ -59,13 +59,13 @@
     });
 
     document.addEventListener("keyup", (event) => {
-      if (event.key === key && isListening) {
+      if (isListening) {
         finish();
       }
     });
   }
 
-  initializePushToTalk("F10");
+  initializePushToTalk("~");
 
   document.addEventListener("speech", (event) => {
     const transcript = event.detail;
