@@ -1,96 +1,109 @@
 <body>
-  Push ~ to start recording, and release key to stop recording. <a href="https://github.com/richardanaya/push-to-talk/">GitHub</a>
-<body>
-<script>
-  function initializePushToTalk(key) {
-    var permission = false;
-    let askingPermission = false;
+  Push ~ to start recording, and release key to stop recording.
+  <a href="https://github.com/richardanaya/push-to-talk/">GitHub</a>
+  <body>
+    <script>
+      function initializePushToTalk(key) {
+        var permission = false;
+        let askingPermission = false;
 
-    let speechFn;
-    if(window.webkitSpeechRecognition){
-      speechFn = webkitSpeechRecognition;
-    } else if(window.SpeechRecognition){
-      speechFn = SpeechRecognition;
-    }
-    
-    const speechRecognition = new speechFn();
-    speechRecognition.onresult = (event) => {
-      const transcript = event.results[0][0].transcript;
-      const speechEvent = new CustomEvent("speech", {
-        detail: transcript,
-      });
-      document.dispatchEvent(speechEvent);
-    };
-    let isListening = false;
+        let speechFn;
+        if (window.webkitSpeechRecognition) {
+          speechFn = webkitSpeechRecognition;
+        } else if (window.SpeechRecognition) {
+          speechFn = SpeechRecognition;
+        }
 
-    document.addEventListener("keydown", (event) => {
-      if (event.key === key) {
-        if (!isListening && permission) {
-          speechRecognition.start();
-          isListening = true;
-          const speechEvent = new CustomEvent("speechstarted");
+        const speechRecognition = new speechFn();
+        speechRecognition.onresult = (event) => {
+          const transcript = event.results[0][0].transcript;
+          const speechEvent = new CustomEvent("speech", {
+            detail: transcript,
+          });
           document.dispatchEvent(speechEvent);
-        } else {
-          if (!askingPermission) {
-            askingPermission = true;
-            let recognition = new speechFn();
-            recognition.continuous = true;
-            recognition.interimResults = true;
-            recognition.start();
+        };
+        let isListening = false;
 
-            recognition.onstart = function () {
-              permission = true;
-              recognition.continuous = false;
-              recognition.interimResults = false;
-              recognition.stop();
-              recognition = undefined;
-            };
+        function startListening() {
+          if (!isListening && permission) {
+            speechRecognition.start();
+            isListening = true;
+            const speechEvent = new CustomEvent("speechstarted");
+            document.dispatchEvent(speechEvent);
+          } else {
+            if (!askingPermission) {
+              askingPermission = true;
+              let recognition = new speechFn();
+              recognition.continuous = true;
+              recognition.interimResults = true;
+              recognition.start();
+
+              recognition.onstart = function () {
+                permission = true;
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                recognition.stop();
+                recognition = undefined;
+              };
+            }
           }
         }
+
+        function stopListening() {
+          isListening = false;
+          setTimeout(() => {
+            speechRecognition.stop();
+            const speechEvent = new CustomEvent("speechended");
+            document.dispatchEvent(speechEvent);
+          }, 500);
+        }
+
+        if (key) {
+          document.addEventListener("keydown", (event) => {
+            if (event.key === key) {
+              startListening();
+            }
+          });
+
+          window.addEventListener("blur", () => {
+            if (isListening) {
+              stopListening();
+            }
+          });
+
+          document.addEventListener("keyup", (event) => {
+            if (isListening) {
+              stopListening();
+            }
+          });
+        }
+
+        return {
+          startListening,
+          stopListening,
+        };
       }
-    });
 
-    function finish() {
-      isListening = false;
-      setTimeout(() => {
-        speechRecognition.stop();
-        const speechEvent = new CustomEvent("speechended");
-        document.dispatchEvent(speechEvent);
-      }, 500);
-    }
+      initializePushToTalk("~");
 
-    window.addEventListener("blur", () => {
-      if (isListening) {
-        finish();
-      }
-    });
+      document.addEventListener("speech", (event) => {
+        const transcript = event.detail;
+        const transcriptElement = document.createElement("p");
+        transcriptElement.innerText = transcript;
+        document.body.appendChild(transcriptElement);
+      });
 
-    document.addEventListener("keyup", (event) => {
-      if (isListening) {
-        finish();
-      }
-    });
-  }
+      document.addEventListener("speechstarted", () => {
+        const statusElement = document.createElement("p");
+        statusElement.innerText = "Listening...";
+        document.body.appendChild(statusElement);
+      });
 
-  initializePushToTalk("~");
-
-  document.addEventListener("speech", (event) => {
-    const transcript = event.detail;
-    const transcriptElement = document.createElement("p");
-    transcriptElement.innerText = transcript;
-    document.body.appendChild(transcriptElement);
-  });
-
-  document.addEventListener("speechstarted", () => {
-    const statusElement = document.createElement("p");
-    statusElement.innerText = "Listening...";
-    document.body.appendChild(statusElement);
-  });
-
-  document.addEventListener("speechended", () => {
-    const statusElement = document.createElement("p");
-    statusElement.innerText = "Stopped listening.";
-    document.body.appendChild(statusElement);
-  });
-</script>
-
+      document.addEventListener("speechended", () => {
+        const statusElement = document.createElement("p");
+        statusElement.innerText = "Stopped listening.";
+        document.body.appendChild(statusElement);
+      });
+    </script>
+  </body>
+</body>
