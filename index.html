@@ -39,7 +39,6 @@
             recognition.start();
 
             recognition.onstart = function () {
-              console.log("permission granted");
               permission = true;
               recognition.continuous = false;
               recognition.interimResults = false;
