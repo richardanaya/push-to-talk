@@ -3,7 +3,7 @@
 A simple javsacript snippet that shows how to make a simple push button voice to text recorder.
 
 ```javascript
-initializePushToTalk("F10");
+initializePushToTalk("~");
 
 document.addEventListener("speech", (event) => {
   const transcript = event.detail;
