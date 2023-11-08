@@ -44,9 +44,9 @@
     });
 
     function finish() {
+      isListening = false;
       setTimeout(() => {
         speechRecognition.stop();
-        isListening = false;
         const speechEvent = new CustomEvent("speechended");
         document.dispatchEvent(speechEvent);
       }, 500);
